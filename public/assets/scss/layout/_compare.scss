@@ -1,0 +1,58 @@
+.tp-compare{
+  &-table{
+    overflow-x: scroll;
+    & td,
+    & th{
+      vertical-align: middle;
+      border: 1px solid rgba($color: #000, $alpha: .1);
+    }
+  }
+  &-thumb{
+    & img{
+      margin-bottom: 15px;
+    }
+  }
+  &-product-title{
+    font-size: 18px;
+    & a{
+      font-family:var(--tp-ff-jost);
+      &:hover{
+        color: var(--tp-heading-primary);
+      }
+    }
+  }
+  &-desc{
+    & p{
+      margin-bottom: 0;
+    }
+  }
+  &-rating{
+    & span{
+      font-size: 16px;
+      color: var(--tp-heading-primary);
+    }
+  }
+  &-price{
+    & span{
+      font-size: 14px;
+      color: #000;
+      font-weight: 500;
+      margin-right: 7px;
+      &.old-price{
+          color: #8c8c8c;
+          text-decoration: line-through;
+      }
+  }
+  }
+  &-remove{
+    & button{
+      background: transparent;
+      font-size: 16px;
+      color: #000;
+
+      &:hover{
+        color: var(--tp-heading-primary);
+      }
+    }
+  }
+}
