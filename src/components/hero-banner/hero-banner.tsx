@@ -16,8 +16,8 @@ interface Banner {
 
 // API Configuration
 // NOTE: For Next.js image optimization, the base URL must be added to next.config.js
-const API_URL = 'http://localhost:3000/api/banners';
-const BASE_IMAGE_URL = "http://localhost:3000";
+const API_URL = 'https://ecomm.braventra.in/api/banners';
+const BASE_IMAGE_URL = "https://ecomm.braventra.in/";
 
 const HeroBanner = () => {
   const [banners, setBanners] = useState<Banner[]>([]);

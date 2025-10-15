@@ -110,14 +110,14 @@ const AllProducts = ({style_2=false,style_3=false}:IProps) => {
         setLoading(true);
         
         // Fetch products data
-        const productsResponse = await fetch('http://localhost:3000/api/products');
+        const productsResponse = await fetch('https://ecomm.braventra.in/api/products');
         if (!productsResponse.ok) {
           throw new Error('Failed to fetch products');
         }
         const productsData: IApiResponse = await productsResponse.json();
         
         // Fetch categories data
-        const categoriesResponse = await fetch('http://localhost:3000/api/category');
+        const categoriesResponse = await fetch('https://ecomm.braventra.in/api/category');
         if (!categoriesResponse.ok) {
           throw new Error('Failed to fetch categories');
         }
@@ -144,7 +144,7 @@ const AllProducts = ({style_2=false,style_3=false}:IProps) => {
     setActiveTab(tab);
     if (tab === 'All Products') {
       // Show all products
-      fetch('http://localhost:3000/api/products')
+      fetch('https://ecomm.braventra.in/api/products')
         .then(res => res.json())
         .then((data: IApiResponse) => setProducts(data.data.products))
         .catch(err => console.error('Error fetching products:', err));
@@ -152,7 +152,7 @@ const AllProducts = ({style_2=false,style_3=false}:IProps) => {
       // Filter products by category name
       const category = categories.find(cat => cat.name === tab);
       if (category) {
-        fetch('http://localhost:3000/api/products')
+        fetch('https://ecomm.braventra.in/api/products')
           .then(res => res.json())
           .then((data: IApiResponse) => {
             const filteredProducts = data.data.products.filter(
@@ -251,7 +251,7 @@ const AllProducts = ({style_2=false,style_3=false}:IProps) => {
                         const imageUrl = formatImageUrl(product.image_url);
                         return (
                           <SwiperSlide key={product.product_id}>
-                            {/* <ProductSingle product={{
+                            <ProductSingle product={{
                               id: product.product_id,
                               title: product.name,
                               price: parseFloat(product.price),
@@ -266,7 +266,7 @@ const AllProducts = ({style_2=false,style_3=false}:IProps) => {
                                 parent: categories.find(cat => cat.id === product.category_id)?.name || 'Uncategorized',
                                 child: ''
                               }
-                            }} /> */}
+                            }} />
                           </SwiperSlide>
                         );
                       })}
