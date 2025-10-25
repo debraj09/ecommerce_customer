@@ -92,7 +92,7 @@ const FooterTwo = () => {
                             <Image src={payment} alt="payment" style={{height:"auto"}}/>
                            </a>
                         </div>
-                        <span className="tpfooter__copyright-text">Copyright © <a href="#">ORFARM</a> all rights reserved. Powered by <a href="#">ThemePure</a>.</span>
+                        <span className="tpfooter__copyright-text">Copyright © <a href="#">Ecommerce</a> all rights reserved. Powered by <a href="#">ThemePure</a></span>
                     </div>
                   </div>
               </div>

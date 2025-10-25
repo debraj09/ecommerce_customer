@@ -31,9 +31,10 @@ const Header = () => {
                   <div className="row align-items-center">
                      <div className="col-xl-3">
                         <div className="header__logo">
-                           <Link href="/">
+                           {/* <Link href="/">
                               <Image src={logo} alt="logo" style={{height: 'auto'}}/>
-                           </Link>
+                           </Link> */}
+                           <h2 style={{fontWeight:'bold'}}>Ecommerce</h2>
                         </div>
                      </div>
                      <div className="col-xl-6">
