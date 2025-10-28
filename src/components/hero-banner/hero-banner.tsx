@@ -1,7 +1,8 @@
 "use client";
 import React, { useState, useEffect, useCallback } from "react";
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import Image from 'next/image';
+// The 'next/image' import is removed as it causes build errors in this environment.
+// Standard <img> tag will be used instead.
 
 interface Banner {
   id: number;
@@ -13,7 +14,8 @@ interface Banner {
 }
 
 const API_URL = 'https://ecomm.braventra.in/api/banners';
-const BASE_IMAGE_URL = "https://ecomm.braventra.in/";
+// Removed trailing slash for robust path concatenation in getAbsoluteImageUrl
+const BASE_IMAGE_URL = "https://ecomm.braventra.in"; 
 
 const HeroBanner = () => {
   const [banners, setBanners] = useState<Banner[]>([]);
@@ -21,10 +23,15 @@ const HeroBanner = () => {
   const [error, setError] = useState<string | null>(null);
   const [currentBannerIndex, setCurrentBannerIndex] = useState(0);
 
+  /**
+   * Correctly constructs the absolute image URL.
+   * This logic ensures exactly one slash separates the base URL and the relative path.
+   */
   const getAbsoluteImageUrl = (relativePath: string) => {
     const base = BASE_IMAGE_URL.replace(/\/$/, '');
-    const path = relativePath.startsWith('/') ? relativePath : /${relativePath};
-    return base + path;
+    // Ensure the relative path does not start with a slash if the base does not end with one
+    const path = relativePath.startsWith('/') ? relativePath.substring(1) : relativePath;
+    return `${base}/${path}`;
   };
 
   useEffect(() => {
@@ -32,13 +39,14 @@ const HeroBanner = () => {
       try {
         const response = await fetch(API_URL);
         if (!response.ok) {
-          throw new Error(HTTP error! status: ${response.status});
+          throw new Error(`HTTP error! status: ${response.status}`);
         }
         const apiResponse = await response.json();
 
         if (apiResponse.status === 200 && apiResponse.data) {
           const processedBanners: Banner[] = apiResponse.data.map((banner: Banner, index: number) => ({
             ...banner,
+            // Assign subtitles based on their position in the array
             subtitle: index === 0 ? "TOP SELLER IN THE WEEK" : (index === 1 ? "SEASONAL DEALS" : "WELLNESS TIPS")
           }));
           setBanners(processedBanners);
@@ -54,8 +62,7 @@ const HeroBanner = () => {
       }
     };
 
-    const loadTimeout = setTimeout(fetchBanners, 100);
-    return () => clearTimeout(loadTimeout);
+    fetchBanners();
   }, []);
 
   const handleNextSlide = useCallback(() => {
@@ -68,14 +75,15 @@ const HeroBanner = () => {
     setCurrentBannerIndex(prevIndex => (prevIndex - 1 + banners.length) % banners.length);
   };
 
+  /**
+   * Manages the auto-scroll interval.
+   */
   useEffect(() => {
     if (banners.length > 1) {
-      const interval = setInterval(() => {
-        handleNextSlide();
-      }, 5000);
+      const interval = setInterval(handleNextSlide, 5000);
       return () => clearInterval(interval);
     }
-  }, [banners.length, currentBannerIndex, handleNextSlide]);
+  }, [banners.length, handleNextSlide]);
 
   if (loading) {
     return (
@@ -97,7 +105,7 @@ const HeroBanner = () => {
             }
           `}
         </style>
-        <div style={{ paddingTop: 20, paddingBottom: 20, marginLeft: '50%' }} className="flex flex-col items-center">
+        <div className="flex flex-col items-center">
           <div className="loader"></div>
           <span className="mt-4 font-medium text-gray-600">Loading banners...</span>
         </div>
@@ -120,7 +128,7 @@ const HeroBanner = () => {
   return (
     <section className="relative w-full overflow-hidden bg-gray-50 shadow-lg group" style={{ height: '100vh', minHeight: '600px' }}>
 
-      <style>
+      <style jsx global>
         {`
           .slider-track {
             display: flex;
@@ -143,21 +151,31 @@ const HeroBanner = () => {
             overflow: hidden;
           }
           
+          /* Styles for the standard <img> replacement */
+          .full-width-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover; /* Equivalent to style={{ objectFit: "cover" }} */
+          }
+
           .content-below {
             position: absolute;
-            bottom: 0;
+            top: 0;
             left: 0;
             width: 100%;
             z-index: 2;
             padding: 40px 0;
-            background: linear-gradient(transparent, rgba(0,0,0,0.3));
+            background: linear-gradient(to top, rgba(0,0,0,0.6) 0%, transparent 100%);
+            height: 100%;
+            display: flex;
+            align-items: flex-end;
           }
           
           .container { 
             max-width: 1200px; 
             margin: 0 auto; 
             padding: 0 15px; 
-            height: 100%; 
+            width: 100%;
           }
           
           .tpslider__sub-title { 
@@ -292,13 +310,14 @@ const HeroBanner = () => {
             >
               {/* Full Screen Image Section */}
               <div className="full-width-image">
-                <Image
+                {/* Replaced Next.js Image component with standard <img> */}
+                <img
                   src={fullImageUrl}
                   alt={item.title}
-                  fill
-                  style={{ objectFit: "cover" }}
-                  quality={80}
-                  priority={currentBannerIndex === item.id - 1}
+                  // These styles are now handled by the .full-width-image img CSS rule
+                  loading="lazy"
+                  width="1920" // Placeholder size for layout stability
+                  height="1080" // Placeholder size for layout stability
                 />
               </div>
 
