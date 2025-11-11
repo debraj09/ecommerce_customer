@@ -3,7 +3,6 @@ import React from 'react';
 import Link from 'next/link';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation } from 'swiper/modules';
-// 💡 FIX 1: Import SwiperOptions type
 import { SwiperOptions } from 'swiper/types'; 
 import ProductSingle from '../product-single/product-single';
 
@@ -27,7 +26,6 @@ interface ILocalProductData {
     category: ILocalProductCategory;
 }
 // ====================================================================
-
 
 // Define types based on your API response
 interface IProduct {
@@ -72,7 +70,6 @@ const slider_setting: SwiperOptions = {
     spaceBetween: 20,
     observer: true,
     observeParents: true,
-    // Note: `autoplay` properties here are fine without `as const`
     autoplay: {
         delay: 5000,
         disableOnInteraction: true,
@@ -100,19 +97,47 @@ const slider_setting: SwiperOptions = {
     }
 };
 
-// CORRECTED image URL formatter for Next.js
+// FIXED image URL formatter - Add full domain for API images
 const formatImageUrl = (url: string | null): string => {
-    if (!url) return '/images/default-product.jpg'; 
+    console.log("Formatting image URL:", url);
     
-    if (url.startsWith('/public/')) {
-        return url.replace('/public', '');
+    if (!url) {
+        console.log("No URL provided, using default image");
+        return '/assets/img/product/product-1.jpg';
     }
     
-    if (url.startsWith('/')) {
+    // If it's already a full URL (http/https), return as is
+    if (url.startsWith('http://') || url.startsWith('https://')) {
         return url;
     }
     
-    return url;
+    // If it starts with /public/images, construct full URL to your API domain
+    if (url.startsWith('/public/images/')) {
+        const filename = url.replace('/public/images/', '');
+        const fullUrl = `https://ecomm.braventra.in/public/images/${filename}`;
+        console.log("Constructed full URL:", fullUrl);
+        return fullUrl;
+    }
+    
+    // If it starts with /images/, construct full URL to your API domain
+    if (url.startsWith('/images/')) {
+        const filename = url.replace('/images/', '');
+        const fullUrl = `https://ecomm.braventra.in/public/images/${filename}`;
+        console.log("Constructed full URL:", fullUrl);
+        return fullUrl;
+    }
+    
+    // For any other relative paths, assume they're from your API
+    if (url.startsWith('/')) {
+        const fullUrl = `https://ecomm.braventra.in${url}`;
+        console.log("Constructed full URL from root path:", fullUrl);
+        return fullUrl;
+    }
+    
+    // If it doesn't start with /, assume it's a relative path and add domain
+    const fullUrl = `https://ecomm.braventra.in/public/images/${url}`;
+    console.log("Constructed full URL from filename:", fullUrl);
+    return fullUrl;
 };
 
 // prop type 
@@ -148,6 +173,8 @@ const AllProducts = ({style_2=false,style_3=false}:IProps) => {
                 const categoriesData: ICategoryResponse = await categoriesResponse.json();
 
                 const fetchedProducts = productsData.data.products || [];
+                console.log("Fetched products:", fetchedProducts);
+                
                 setAllProducts(fetchedProducts);
                 setFilteredProducts(fetchedProducts);
                 setCategories(categoriesData.data.categories || []);
@@ -187,15 +214,18 @@ const AllProducts = ({style_2=false,style_3=false}:IProps) => {
     // Add debug logging to see what's happening with images
     React.useEffect(() => {
         if (productsToDisplay.length > 0) {
-            console.log('Product images debug:');
+            console.log('=== PRODUCT IMAGES DEBUG ===');
             productsToDisplay.forEach(product => {
                 const formattedUrl = formatImageUrl(product.image_url);
                 console.log(`Product: ${product.name}`, {
-                    original: product.image_url,
-                    formatted: formattedUrl,
-                    category: categories.find(cat => cat.id === product.category_id)?.name
+                    product_id: product.product_id,
+                    original_image_url: product.image_url,
+                    formatted_image_url: formattedUrl,
+                    category: categories.find(cat => cat.id === product.category_id)?.name,
+                    has_image: !!product.image_url
                 });
             });
+            console.log('=== END DEBUG ===');
         }
     }, [productsToDisplay, categories]);
 
@@ -265,29 +295,35 @@ const AllProducts = ({style_2=false,style_3=false}:IProps) => {
 
                                 <div className="tpproduct__arrow p-relative">
                                     {productsToDisplay.length > 0 ? (
-                                        // 💡 FIX 3: Pass modules directly. No changes needed here, as the problem was in the definition of slider_setting.
                                         <Swiper {...slider_setting} modules={[Navigation]} className="swiper-container tpproduct-active tpslider-bottom p-relative">
                                             {productsToDisplay.map((product) => {
                                                 const imageUrl = formatImageUrl(product.image_url);
                                                 
+                                                console.log(`Rendering product ${product.product_id}:`, {
+                                                    name: product.name,
+                                                    imageUrl: imageUrl
+                                                });
+                                                
                                                 return (
                                                     <SwiperSlide key={product.product_id}>
-                                                        {/* Using 'as any' temporarily until IProductData is fixed */}
-                                                        <ProductSingle product={{
-                                                            id: product.product_id,
-                                                            title: product.name,
-                                                            price: parseFloat(product.price),
-                                                            image: {
-                                                                id: product.product_id, 
-                                                                original: imageUrl,
-                                                            },
-                                                            smDesc: product.description, 
-                                                            availability: product.stock_quantity > 0,
-                                                            category: {
-                                                                parent: categories.find(cat => cat.id === product.category_id)?.name || 'Uncategorized',
-                                                                child: ''
-                                                            }
-                                                        } as any} /> 
+                                                        {/* Wrapping ProductSingle with Link for navigation */}
+                                                        <Link href={`/shop-details/${product.product_id}`} style={{ display: 'block', textDecoration: 'none' }}>
+                                                            <ProductSingle product={{
+                                                                id: product.product_id,
+                                                                title: product.name,
+                                                                price: parseFloat(product.price),
+                                                                image: {
+                                                                    id: product.product_id, 
+                                                                    original: imageUrl,
+                                                                },
+                                                                smDesc: product.description, 
+                                                                availability: product.stock_quantity > 0,
+                                                                category: {
+                                                                    parent: categories.find(cat => cat.id === product.category_id)?.name || 'Uncategorized',
+                                                                    child: ''
+                                                                }
+                                                            } as any} />
+                                                        </Link>
                                                     </SwiperSlide>
                                                 );
                                             })}
@@ -298,8 +334,16 @@ const AllProducts = ({style_2=false,style_3=false}:IProps) => {
                                         </div>
                                     )}
                                     <div className="tpproduct-btn">
-                                        <div className="tpprduct-arrow tpproduct-btn__prv"><a href="#"><i className="icon-chevron-left"></i></a></div>
-                                        <div className="tpprduct-arrow tpproduct-btn__nxt"><a href="#"><i className="icon-chevron-right"></i></a></div>
+                                        <div className="tpprduct-arrow tpproduct-btn__prv">
+                                            <button type="button">
+                                                <i className="icon-chevron-left"></i>
+                                            </button>
+                                        </div>
+                                        <div className="tpprduct-arrow tpproduct-btn__nxt">
+                                            <button type="button">
+                                                <i className="icon-chevron-right"></i>
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -315,7 +359,7 @@ const AllProducts = ({style_2=false,style_3=false}:IProps) => {
                         </div>
                     </div>
                 </div>
-            </section>  
+            </section>
         </>
     );
 };
