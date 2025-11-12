@@ -36,6 +36,7 @@ export default function ShopDetailsPage({
         {/* breadcrumb-area-end */}
 
         {/* shop details area start */}
+        {/* @ts-ignore */}
         <ShopDetailsArea product={product} />
         {/* shop details area end */}
 
